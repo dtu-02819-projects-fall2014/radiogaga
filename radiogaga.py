@@ -99,12 +99,12 @@ if play_status is 'music':
 if play_status is 'music':
     try:
         time_stamp = element[0][2]
-        time_array = time_stamp.split()
+        time_array = time_stamp.split('\n')
         l = len(time_array)
         last_time = unicode(time_array[l-1])
         
-        if not last_time == time_stamp:
-            updated_time = time_array + '\n' + time_stamp
+        if not last_time == play_time:
+            updated_time = time_stamp + '\n' + play_time
             updateElementDB(track,artist,updated_time)
     except:
         insertElementDB(track,artist,play_time,bpm,temper)
