@@ -7,6 +7,7 @@ Created on Fri Oct 03 17:59:41 2014
 import urllib2 as ul
 import json
 import MySQLdb
+import sys
 from gettempo import getbpm
 
 
@@ -59,37 +60,51 @@ def mining_station(station):
  
 
 
+
+
+
 #Set up a MySQL connection
-db = MySQLdb.connect(host="localhost", user="root", passwd="",db="radiogaga")
-cursor = db.cursor()
+try:
+    db = MySQLdb.connect(host="localhost", user="root", passwd="",db="radiogaga")
+    cursor = db.cursor()
+except:
+    sys.exit("No connection to MySQL")
+        
 
 play_status = 'music'
 
 #Retrieve the json data from broadcaster
 play_data = mining_station('P3')
 try:
-    track = play_data[0]
-    artist = play_data[1]
+    track = play_data[0].decode('iso-8859-1')
+    artist = play_data[1].decode('iso-8859-1')
     play_time = play_data[2]
     
     #Encoding for MySQL
-    track_list = list(track)
-    for ch in range(1,len(track_list)):
-        if track_list[ch] == u"'":
-            track_list[ch] = u"''"
-    track = ''.join(track_list)
-    
-    artist_list = list(artist)
-    for ch in range(1,len(artist_list)):
-        if artist_list[ch] == u"'":
-            artist_list[ch] = u"''"
-    artist = ''.join(artist_list)
-    
-    bpm = getbpm(artist,track)
-    temper = 0 #temp
-    
+    try:
+        track_list = list(track)
+        for ch in range(1,len(track_list)):
+            if track_list[ch] == u"'":
+                track_list[ch] = u"''"
+        track = ''.join(track_list)
+        
+        artist_list = list(artist)
+        for ch in range(1,len(artist_list)):
+            if artist_list[ch] == u"'":
+                artist_list[ch] = u"''"
+        artist = ''.join(artist_list)
+    except IOError:
+        print('IOEroror')
 except:
     play_status = 'no music'
+    
+
+try:
+    bpm = getbpm(artist,track)
+    temper = 0 #temp
+except:
+    bpm = -1
+    temper = -1        
    
    
 #Get the element from the db; it may or may not jet exist
@@ -108,8 +123,6 @@ if play_status is 'music':
             updateElementDB(track,artist,updated_time)
     except:
         insertElementDB(track,artist,play_time,bpm,temper)
-
-
 
 #Always close connection to the db
 db.close()
