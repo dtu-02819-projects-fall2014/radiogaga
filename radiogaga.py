@@ -75,14 +75,12 @@ if True:
     
     #Get data from station
     try:
-        play_data = mining_station('P3')
+        play_data = mining_station(station)
     except:
         print 'No data to retrieve'
     
     play_status = 'music'
     
-    #Retrieve the json data from broadcaster
-    play_data = mining_station('P3')
     try:
         track = play_data[0].decode('iso-8859-1')
         artist = play_data[1].decode('iso-8859-1')
@@ -131,6 +129,6 @@ if True:
     db.close()
     print(play_data)
     
-    t.sleep(30)
+    #t.sleep(30)
     
     
