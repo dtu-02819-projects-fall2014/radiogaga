@@ -6,6 +6,7 @@ import sys
 import time as t
 import sys
 from GetScore import GetScore
+from radioplay import radioplay
 from gettempo import getbpm
 
 live = ''
@@ -20,26 +21,22 @@ try:
     else:
         sys.exit('Error in command. No such station was found')
 except:
-    live = 'p3'
+    live = 'p7m'
     print('Error in command. You have to specify the name of the station')
         
 
 def mining_station(station):
+    #Only DR radio stations
     if station == 'p3' or station == 'p7m':
-        address = {"http":"http://www.dr.dk/playlister/feeds/nowNext/nowPrev.drxml?items=1&cid=%s" % stationcodes[station]}
-    elif station == 'thevoice' or station == 'novafm' or station == 'popfm':
-        address = {"http":"http://static.radioplay.dk/data/all_dk.jsonp"}      
+        address = {"http":"http://www.dr.dk/playlister/feeds/nowNext/nowPrev.drxml?items=1&cid=%s" % stationcodes[station]}  
+        headers = {'User-agent':'Mozilla/5.0'}
+        prox = ul.ProxyHandler(address)
+        opener = ul.build_opener(prox, ul.HTTPHandler(debuglevel=0))
+        ul.install_opener(opener)
         
-    headers = {'User-agent':'Mozilla/5.0'}
-    prox = ul.ProxyHandler(address)
-    opener = ul.build_opener(prox, ul.HTTPHandler(debuglevel=0))
-    ul.install_opener(opener)
-    
-    req = ul.Request(address["http"],None,headers)
-    data = ul.urlopen(req).read()
-    
-    
-    if station == 'p3' or station == 'p7m':
+        req = ul.Request(address["http"],None,headers)
+        data = ul.urlopen(req).read()
+        
         try:
             json_data = json.loads(data)
             
@@ -50,6 +47,9 @@ def mining_station(station):
                 return (track_title, track_artist, play_time)
         except:
             print 'No json was found' 
+    #Other radio stations
+    elif station == 'thevoice' or station == 'novafm' or station == 'popfm':
+        [artist, title] = radioplay(station)
 
 
 def insert_element_to_db(station, track, artist, time, lastplay, bpm, angry, relaxed, sad, happy):
@@ -69,9 +69,9 @@ def get_element_from_db(station,track, artist):
     element = cursor.fetchall()
     return element
 
-def update_element_from_db(station,track,artist,time,lastplay):
-    sql_command = """UPDATE %s SET time = '%s', lastplay = '%s' WHERE track='%s'
-                     AND artist = '%s'""" % (station,time,lastplay,track,artist)
+def update_element_from_db(station,track,artist,time,lastplay,bpm,angry,relaxed,sad,happy):
+    sql_command = """UPDATE %s SET time = '%s', bpm = %d, lastplay = '%s', angry = %d, relaxed = %d, sad = %d, happy = %d WHERE track='%s'
+                     AND artist = '%s'""" % (station,time,bpm,lastplay,angry,relaxed,sad,happy,track,artist)
     try:
         cursor.execute(sql_command)
         db.commit()
@@ -81,14 +81,10 @@ def update_element_from_db(station,track,artist,time,lastplay):
 
 
 
-
-
-
-
 if True:
     #Establish MySQL connection
     try:
-        db = MySQLdb.connect(host="####",user="###", passwd="###",db="radiogaga")
+        db = MySQLdb.connect(host="83.92.40.216",user="bobafett", passwd="bobafett",db="radiogaga")
         cursor = db.cursor()
     except:
         sys.exit("No connection to MySQL")
@@ -160,7 +156,7 @@ if True:
             
             if not last_time == play_time:
                 updated_time = time_stamp + ',' + play_time
-                update_element_from_db(live,track,artist,updated_time,play_time)
+                update_element_from_db(live,track,artist,updated_time,play_time,bpm,angry,relaxed,sad,happy)
         except:
             insert_element_to_db(live,track,artist,play_time,play_time,bpm,angry,relaxed,sad,happy)
     
