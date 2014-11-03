@@ -14,7 +14,7 @@ def getbpm(artist,title):
     artist = ul.quote(artist.encode('utf-8'))
     title = ul.quote(title.encode('utf-8'))
     #unicode(title,'utf-8')
-    url_str_id = 'http://developer.echonest.com/api/v4/song/search?api_key=6CQET4WZOPHVC3RCZ&artist='+artist+'&title='+title
+    url_str_id = 'http://developer.echonest.com/api/v4/song/search?api_key=KEY&artist='+artist+'&title='+title
     headers = {'User-agent':'Mozilla/5.0'}
     
     ul_req_id = ul.Request(url_str_id,None, headers)
@@ -26,7 +26,7 @@ def getbpm(artist,title):
     except:
         print('ERROR: NOT IN ECHONEST?!?' + artist + title)
         return(0)
-    url_str_bpm = 'http://developer.echonest.com/api/v4/song/profile?api_key=6CQET4WZOPHVC3RCZ&id=' + song_id +'&bucket=audio_summary'
+    url_str_bpm = 'http://developer.echonest.com/api/v4/song/profile?api_key=KEY&id=' + song_id +'&bucket=audio_summary'
     ul_req_bpm = ul.Request(url_str_bpm)
     json_str_bpm = ul.urlopen(ul_req_bpm).read()
     json_data_bpm = json.loads(json_str_bpm)
