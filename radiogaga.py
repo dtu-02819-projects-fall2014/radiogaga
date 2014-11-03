@@ -1,19 +1,35 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Sun Oct 12 20:05:42 2014
-
-@author: Rasmus
-"""
 import urllib2 as ul
 import json
 import MySQLdb
 import sys
 import time as t
+import sys
+from GetScore import GetScore
+from gettempo import getbpm
 
-station = 'P3'
+live = ''
+stations = ['p3','p7m','thevoice','novafm','popfm']
+stationcodes = {'p3':'P3','p7m':'P7M','thevoice':17,'novafm':18,'popfm':19}
+
+#Handle cammand arguments
+call = list(sys.argv)
+try:
+    if call[1] in stations:
+        live = call[1]
+    else:
+        sys.exit('Error in command. No such station was found')
+except:
+    live = 'p3'
+    print('Error in command. You have to specify the name of the station')
+        
 
 def mining_station(station):
-    address = {"http":"http://www.dr.dk/playlister/feeds/nowNext/nowPrev.drxml?items=1&cid=%s" % station}
+    if station == 'p3' or station == 'p7m':
+        address = {"http":"http://www.dr.dk/playlister/feeds/nowNext/nowPrev.drxml?items=1&cid=%s" % stationcodes[station]}
+    elif station == 'thevoice' or station == 'novafm' or station == 'popfm':
+        address = {"http":"http://static.radioplay.dk/data/all_dk.jsonp"}      
+        
     headers = {'User-agent':'Mozilla/5.0'}
     prox = ul.ProxyHandler(address)
     opener = ul.build_opener(prox, ul.HTTPHandler(debuglevel=0))
@@ -22,21 +38,23 @@ def mining_station(station):
     req = ul.Request(address["http"],None,headers)
     data = ul.urlopen(req).read()
     
-    try:
-        json_data = json.loads(data)
-        
-        if not 'no_music' in json_data['now']['status']:
-            track_title = json_data['now']['track_title']
-            track_artist = json_data['now']['display_artist']
-            play_time = json_data['now']['start_time']
-            return (track_title, track_artist, play_time)
-    except:
-        print 'No json'
+    
+    if station == 'p3' or station == 'p7m':
+        try:
+            json_data = json.loads(data)
+            
+            if not 'no_music' in json_data['now']['status']:
+                track_title = json_data['now']['track_title']
+                track_artist = json_data['now']['display_artist']
+                play_time = json_data['now']['start_time']
+                return (track_title, track_artist, play_time)
+        except:
+            print 'No json was found' 
 
 
-def insertElementDB(track, artist, time, bpm, temper):
-    sql_command = """INSERT INTO music(track,artist,time,bpm,temper) 
-                     VALUES ('%s','%s','%s',%d,%d)""" % (track,artist,time,bpm,temper)   
+def insert_element_to_db(station, track, artist, time, lastplay, bpm, angry, relaxed, sad, happy):
+    sql_command = """INSERT INTO %s(track,artist,time,lastplay,bpm,angry,relaxed,sad,happy) 
+                     VALUES ('%s','%s','%s','%s',%d,%d,%d,%d,%d)""" % (station,track,artist,time,lastplay, bpm,angry,relaxed,sad,happy)   
     try:
         cursor.execute(sql_command)
         db.commit()
@@ -44,42 +62,47 @@ def insertElementDB(track, artist, time, bpm, temper):
         print 'ERROR: in insertElementDB'
         db.rollback()
     
-def getElementFromDB(track, artist):
-    sql_command = """SELECT DISTINCT * FROM music WHERE track='%s' 
-                     AND artist='%s'""" % (track,artist)
+def get_element_from_db(station,track, artist):
+    sql_command = """SELECT DISTINCT * FROM %s WHERE track='%s' 
+                     AND artist='%s'""" % (station,track,artist)
     cursor.execute(sql_command)
     element = cursor.fetchall()
     return element
 
-def updateElementDB(track,artist,time):
-    sql_command = """UPDATE music SET time = '%s' WHERE track='%s'
-                     AND artist = '%s'""" % (time,track,artist)
+def update_element_from_db(station,track,artist,time,lastplay):
+    sql_command = """UPDATE %s SET time = '%s', lastplay = '%s' WHERE track='%s'
+                     AND artist = '%s'""" % (station,time,lastplay,track,artist)
     try:
         cursor.execute(sql_command)
         db.commit()
-    except:
+    except: 
         print 'ERROR: in updateElementDB'
         db.rollback()
-        
 
 
-    
+
+
+
+
 
 if True:
-    #Set up a MySQL connection
+    #Establish MySQL connection
     try:
-        db = MySQLdb.connect(host="localhost", user="root", passwd="",db="radiogaga")
+        db = MySQLdb.connect(host="####",user="###", passwd="###",db="radiogaga")
         cursor = db.cursor()
     except:
-        sys.exit("No connection to MySQL")    
+        sys.exit("No connection to MySQL")
+        
     
     #Get data from station
     try:
-        play_data = mining_station(station)
+        play_data = mining_station(live)
     except:
         print 'No data to retrieve'
     
     play_status = 'music'
+    
+    
     
     try:
         track = play_data[0].decode('iso-8859-1')
@@ -98,19 +121,35 @@ if True:
             for ch in range(1,len(artist_list)):
                 if artist_list[ch] == u"'":
                     artist_list[ch] = u"''"
-            artist = ''.join(artist_list)
+            artist = ''.join(artist_list)                 
         except IOError:
             print('IOEroror')
     except:
         play_status = 'no music'
-        
+
+    #Get BPM for song            
+    if play_status is 'music':
+        try:
+            bpm = getbpm(artist, track)
+        except:
+            print 'bpm failed'
+            bpm = -1
+            
+    #Peform sentiment analysis
+    if play_status is 'music':
+        try:
+            [angry, happy, relaxed, sad] = GetScore(artist,track)
+        except:
+            print 'get score failed'
+            angry = -1
+            relaxed = -1
+            sad = -1
+            happy = -1    
     
-    bpm = -1
-    temper = -1
     
     #Get the element from the db; it may or may not jet exist
     if play_status is 'music':
-        element = getElementFromDB(track,artist)
+        element = get_element_from_db(live,track,artist)
     
     if play_status is 'music':
         try:
@@ -121,14 +160,12 @@ if True:
             
             if not last_time == play_time:
                 updated_time = time_stamp + ',' + play_time
-                updateElementDB(track,artist,updated_time)
+                update_element_from_db(live,track,artist,updated_time,play_time)
         except:
-            insertElementDB(track,artist,play_time,bpm,temper)
+            insert_element_to_db(live,track,artist,play_time,play_time,bpm,angry,relaxed,sad,happy)
     
     #Always close connection to the db
     db.close()
     print(play_data)
     
     #t.sleep(30)
-    
-    
