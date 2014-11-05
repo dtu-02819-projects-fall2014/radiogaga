@@ -21,7 +21,7 @@ try:
     else:
         sys.exit('Error in command. No such station was found')
 except:
-    live = 'p7m'
+    live = 'p3'
     print('Error in command. You have to specify the name of the station')
         
 
@@ -53,8 +53,9 @@ def mining_station(station):
 
 
 def insert_element_to_db(station, track, artist, time, lastplay, bpm, angry, relaxed, sad, happy):
-    sql_command = """INSERT INTO %s(track,artist,time,lastplay,bpm,angry,relaxed,sad,happy) 
-                     VALUES ('%s','%s','%s','%s',%d,%d,%d,%d,%d)""" % (station,track,artist,time,lastplay, bpm,angry,relaxed,sad,happy)   
+    sql_command = """INSERT INTO %s(track,artist,time,lastplay,bpm,angry,relaxed,sad,happy)
+                    VALUES ('%s','%s','%s','%s',%d,%d,%d,%d,%d)
+                    """ % (track,artist,time,lastplay,bpm,angry,relaxed,sad,happy)
     try:
         cursor.execute(sql_command)
         db.commit()
@@ -63,15 +64,15 @@ def insert_element_to_db(station, track, artist, time, lastplay, bpm, angry, rel
         db.rollback()
     
 def get_element_from_db(station,track, artist):
-    sql_command = """SELECT DISTINCT * FROM %s WHERE track='%s' 
-                     AND artist='%s'""" % (station,track,artist)
+    sql_command = """SELECT DISTINCT * FROM %s WHERE track='%s' AND artist='%s'""" % (station,track,artist)
     cursor.execute(sql_command)
     element = cursor.fetchall()
     return element
 
-def update_element_from_db(station,track,artist,time,lastplay,bpm,angry,relaxed,sad,happy):
-    sql_command = """UPDATE %s SET time = '%s', bpm = %d, lastplay = '%s', angry = %d, relaxed = %d, sad = %d, happy = %d WHERE track='%s'
-                     AND artist = '%s'""" % (station,time,bpm,lastplay,angry,relaxed,sad,happy,track,artist)
+def update_element_from_db(station,track,artist,time,lastplay,bpm,angry,relaxed,sad,happy):    
+    sql_command = """UPDATE %s SET time='%s', lastplay='%s' ,bpm=%d,angry=%d,
+                    relaxed=%d,sad=%d,happy=%d WHERE track='%s' AND artist='%s' LIMIT 1
+                    """ % (station,time,lastplay,bpm,angry,relaxed,sad,happy,track,artist)  
     try:
         cursor.execute(sql_command)
         db.commit()
@@ -162,6 +163,7 @@ if True:
     
     #Always close connection to the db
     db.close()
-    print(play_data)
+    if play_status is 'music':
+        print(bpm, angry, happy, relaxed, sad, play_data)
     
     #t.sleep(30)
