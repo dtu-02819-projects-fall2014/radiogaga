@@ -21,7 +21,7 @@ try:
     else:
         sys.exit('Error in command. No such station was found')
 except:
-    live = 'p3'
+    live = 'p7m'
     print('Error in command. You have to specify the name of the station')
         
 
@@ -53,31 +53,30 @@ def mining_station(station):
 
 
 def insert_element_to_db(station, track, artist, time, lastplay, bpm, angry, relaxed, sad, happy):
-    sql_command = """INSERT INTO %s(track,artist,time,lastplay,bpm,angry,relaxed,sad,happy)
-                    VALUES ('%s','%s','%s','%s',%d,%d,%d,%d,%d)
-                    """ % (track,artist,time,lastplay,bpm,angry,relaxed,sad,happy)
+    print('C1::INSERT')    
+    sql_command = """INSERT INTO %s(track,artist,time,lastplay,bpm,angry,relaxed,sad,happy) VALUES ("%s","%s","%s","%s",%d,%d,%d,%d,%d) """ % (station,track,artist,time,lastplay,bpm,angry,relaxed,sad,happy)
     try:
         cursor.execute(sql_command)
         db.commit()
     except:
-        print 'ERROR: in insertElementDB'
+        print 'Error in insert_element_to_db'
         db.rollback()
     
 def get_element_from_db(station,track, artist):
-    sql_command = """SELECT DISTINCT * FROM %s WHERE track='%s' AND artist='%s'""" % (station,track,artist)
+    print('C2::GET')
+    sql_command = """ SELECT DISTINCT * FROM %s WHERE track= "%s" AND artist= "%s" """ % (station,track,artist)
     cursor.execute(sql_command)
     element = cursor.fetchall()
     return element
 
-def update_element_from_db(station,track,artist,time,lastplay,bpm,angry,relaxed,sad,happy):    
-    sql_command = """UPDATE %s SET time='%s', lastplay='%s' ,bpm=%d,angry=%d,
-                    relaxed=%d,sad=%d,happy=%d WHERE track='%s' AND artist='%s' LIMIT 1
-                    """ % (station,time,lastplay,bpm,angry,relaxed,sad,happy,track,artist)  
+def update_element_from_db(station,track,artist,time,lastplay,bpm,angry,relaxed,sad,happy): 
+    print('C3::UPDATE')
+    sql_command = """UPDATE %s SET time="%s",lastplay="%s",bpm=%d,angry=%d, relaxed=%d,sad=%d,happy=%d WHERE track="%s" AND artist="%s" """ % (station,time,lastplay,bpm,angry,relaxed,sad,happy,track,artist)  
     try:
         cursor.execute(sql_command)
         db.commit()
     except: 
-        print 'ERROR: in updateElementDB'
+        print 'Eror in update_element_to_db'
         db.rollback()
 
 
@@ -105,6 +104,9 @@ if True:
         track = play_data[0].decode('iso-8859-1')
         artist = play_data[1].decode('iso-8859-1')
         play_time = play_data[2]
+        
+        track = track.replace(".","")
+        artist = artist.replace(".","")
         
         #Encoding for MySQL
         try:
@@ -135,7 +137,7 @@ if True:
     #Peform sentiment analysis
     if play_status is 'music':
         try:
-            [angry, happy, relaxed, sad] = GetScore(artist,track)
+            (angry, happy, relaxed, sad) = GetScore(artist,track)
         except:
             print 'get score failed'
             angry = -1
