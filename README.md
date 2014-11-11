@@ -1,6 +1,6 @@
 project radiogaga
 =========
-Demo at http://83.92.40.216/
+Demo at http://83.92.40.216/ (in developing)
 
 This project is for the final exam in cource 02819 Datamining with Python at DTU 2014. The project is made by Rasmus Jessen Aaskov, Søren Trads Steen and Joachim Blom Hansen. 
 
