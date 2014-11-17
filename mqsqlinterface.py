@@ -50,14 +50,14 @@ def radiogaga_db_get(MySQLConnection, table, element):
                             'happy':2}
     """
     # DB connection
-    conn = MySQLConnection    
+    conn = MySQLConnection
 
     # Write the mysql command to send to the server
-    sql_command = """SELECT * FROM %s WHERE """ % (table)
-    n_element = len(element)  
+    sql_command = """SELECT * FROM %s WHERE""" % (table)
+    n_element = len(element)
     count = 0
     for option in element:
-        sql_command = sql_command + """%s LIKE "%s" 
+        sql_command = sql_command + """ %s LIKE "%s"
                                     """ % (option, element[option])
         count = count + 1
         if count < n_element:

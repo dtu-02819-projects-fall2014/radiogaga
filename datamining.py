@@ -1,9 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Wed Nov 12 00:00:45 2014
-
-@author: Rasmus
-"""
 import json as js
 import urllib2 as ul
 
@@ -31,7 +26,7 @@ class JsonResponse:
         self.data = ul.urlopen(request).read()
         self.answear = js.loads(self.data)
 
-    def crawl_page(self, level):  
+    def crawl_page(self, level):
         if level != self.nkeys:
             try:
                 element = self.keywords[level]
