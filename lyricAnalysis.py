@@ -7,6 +7,8 @@ Created on Mon Oct 27 13:31:03 2014
 from __future__ import division
 import json
 import urllib2 as ul
+import csv
+from numpy import multiply
 from nltk.tokenize import RegexpTokenizer
 
 
@@ -59,24 +61,23 @@ def lyric_tokens(lyric):
     return(words)
 
 
-def open_libraries(moods):
-    """Opens text files with name ending in 'WordLib.txt',
-       for example 'angryWordLib.txt'.
+def open_libraries(mood_lib):
+    """Opens csv files with name ending in 'WordLib.csv',
+       for example 'angryWordLib.csv'.
     Args:
         moods (list of str): List with names of text files.
     Returns:
         List of list of str: List of lists with words from specified libraries.
     """
-    word_lib = []
-    for mood in moods:
-        temp_lib = open(mood+'WordLib.txt', 'r')
-        temp_read = temp_lib.read()
-        word_lib.append(temp_read)
-        temp_lib.close()
-    return word_lib
+    mood_list = []
+    with open(mood_lib, 'r') as f:
+        reader = csv.reader(f)
+        for row in reader:
+            mood_list.append(row)
+    return(mood_list)
 
 
-def lyric_analyse(lyric_list, moods):
+def lyric_analyse(lyric_list, mood_lib):
     """Counts the number of times a word in the lyrics is found in each
         word library
     Args:
@@ -85,16 +86,15 @@ def lyric_analyse(lyric_list, moods):
     Returns:
         int: Number of times a word from lyrics is found in each library.
     """
-    word_lib = open_libraries(moods)
-    # Tokenize word libraries
-    tokenizer = RegexpTokenizer(r'\w+')
-    tokens = []
-    for lib in word_lib:
-        tokens.append(tokenizer.tokenize(lib))
-    word_count = [0]*len(word_lib)
+    mood_list = open_libraries(mood_lib)
+    word_count = [0]*len(mood_list)
     # Count
-    for i in range(0, len(word_lib)):
+    for i in range(len(mood_list)):
         for word in lyric_list:
-            temp_count = tokens[i].count(word)
-            word_count[i] = word_count[i]+(temp_count*1000)/len(lyric_list)
+            temp_count = mood_list[i].count(word)
+            word_count[i] = word_count[i]+temp_count
+    # Scaling and division by length of song
+    word_count = multiply(1000, word_count)
+    word_count = word_count/len(lyric_list)
+    word_count = word_count.tolist()
     return(word_count)

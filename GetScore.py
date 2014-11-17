@@ -31,6 +31,6 @@ def get_score(artist, title, moods):
 
 artist = 'David Guetta featuring Kelly Rowland'
 title = 'When Love Takes Over'
-moods = ['angry', 'happy', 'relaxed', 'sad']
+moods = 'mood_lib.csv'
 
 lyric_score = get_score(artist, title, moods)
