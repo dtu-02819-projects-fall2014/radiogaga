@@ -6,6 +6,7 @@ Created on Mon Nov 17 14:35:51 2014
 """
 import csv
 
+
 def getfromconfig():
     """
     Return fields from a single line csv file.
