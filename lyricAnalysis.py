@@ -4,23 +4,19 @@ Created on Mon Oct 27 13:31:03 2014
 
 @author: Joachim
 """
+from __future__ import division
 import json
 import urllib2 as ul
 from nltk.tokenize import RegexpTokenizer
 
 
-def getlyrics(artist, title):
+def get_lyrics(artist, title):
     """Find the lyrics to a song.
     Args:
         artist (str): Name of a music artist.
         title (str): Title of a song by a music artist.
     Returns:
         str: Lyrics to the specified song
-    Example:
-        >>> lyrics = getlyrics('David Guetta featuring Kelly Rowland',
-                               'When Love Takes Over')
-        >>> lyrics
-        'It's complicated It always is That’s just the way...' etc.
     """
     artist = ul.quote(artist.encode('utf-8'))
     artist = artist.split('feat', 1)[0]  # Removes any featuring artists
@@ -40,78 +36,65 @@ def getlyrics(artist, title):
     return(lyrics)
 
 
-def lyricTokens(lyric):
+def lyric_tokens(lyric):
     """Tokenization of lyrics.
     Args:
         lyric (str): String of lyrics to a song.
     Returns:
         List of str: List of tokenized words from song lyric.
-    Example:
-        >>> words = lyricTokens('''It's complicated It always is That’s...''')
-        >>> words
-        ['its', 'complicated', 'it', 'always', 'is', 'that']
     """
     # Formatting of words to remove unnecessary new line chars,
     # censorship and apostrophes
     lyric = lyric.replace('\n', ' ')
     lyric = lyric.replace('f*ck', 'fuck')
     lyric = lyric.replace('\'', '')
+    lyric = lyric.replace('\x92', '')
     tokenizer = RegexpTokenizer(r'\w+')
     tokens = tokenizer.tokenize(lyric)
     # Remove words of length 1 and make letters lower case
     words = []
-    for i in tokens:
-        if len(i) > 1:
-            words.append(i.lower())
+    for token in tokens:
+        if len(token) > 1:
+            words.append(token.lower())
     return(words)
 
 
-def openLibraries(moods):
+def open_libraries(moods):
     """Opens text files with name ending in 'WordLib.txt',
        for example 'angryWordLib.txt'.
     Args:
         moods (list of str): List with names of text files.
     Returns:
         List of list of str: List of lists with words from specified libraries.
-    Example:
-        >>> wordLib = openLibraries(['angry','happy','relaxed','sad'])
-        >>> wordLib
-        ['angry, love, could, heart, death, ...] etc.
     """
-    wordLib = []
-    for i in moods:
-        tempLib = open(i+'WordLib.txt', 'r')
-        tempRead = tempLib.read()
-        wordLib.append(tempRead)
-        tempLib.close()
-    return wordLib
+    word_lib = []
+    for mood in moods:
+        temp_lib = open(mood+'WordLib.txt', 'r')
+        temp_read = temp_lib.read()
+        word_lib.append(temp_read)
+        temp_lib.close()
+    return word_lib
 
 
-def lyricAnalyse(lyriclist, moods):
+def lyric_analyse(lyric_list, moods):
     """Counts the number of times a word in the lyrics is found in each
         word library
     Args:
-        lyriclist (list of str): List of words from lyrics
+        lyric_list (list of str): List of words from lyrics
         moods (list of str): List with names of word libraries
     Returns:
         int: Number of times a word from lyrics is found in each library.
-    Example:
-        >>> wordCount = lyricAnalyse([u'its', u'complicated',
-                                      u'it', u'always',...],
-                                      ['angry','happy','relaxed','sad'])
-        >>> wordCount
-        [35, 22, 32, 49]
     """
-    wordLib = openLibraries(moods)
+    word_lib = open_libraries(moods)
     # Tokenize word libraries
     tokenizer = RegexpTokenizer(r'\w+')
     tokens = []
-    for lib in wordLib:
+    for lib in word_lib:
         tokens.append(tokenizer.tokenize(lib))
-    wordCount = [0]*len(wordLib)
+    word_count = [0]*len(word_lib)
     # Count
-    for i in range(0, len(wordLib)):
-        for word in lyriclist:
-            tempcount = tokens[i].count(word)
-            wordCount[i] = wordCount[i]+(float(tempcount)*1000)/len(lyriclist)
-    return(wordCount)
+    for i in range(0, len(word_lib)):
+        for word in lyric_list:
+            temp_count = tokens[i].count(word)
+            word_count[i] = word_count[i]+(temp_count*1000)/len(lyric_list)
+    return(word_count)

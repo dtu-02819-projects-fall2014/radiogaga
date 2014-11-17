@@ -11,7 +11,7 @@ Created on Mon Nov 03 13:25:50 2014
 import lyricAnalysis as LA
 
 
-def GetScore(artist, title, moods):
+def get_score(artist, title, moods):
     """Computes a score of how angry, happy, relaxed, sad, etc. a song is.
     Args:
         artist (str): Name of a music artist.
@@ -20,23 +20,17 @@ def GetScore(artist, title, moods):
     Returns:
         int: Score that indicates how angry, happy, relaxed, sad, etc.
         the specified song is.
-    Example:
-        >>> lyricScore = GetScore('David Guetta featuring Kelly Rowland',
-                                  'When Love Takes Over',
-                                  ['angry', 'happy', 'relaxed', 'sad'])
-        >>> lyricScore
-        [35, 22, 32, 49]
     """
     try:
-        lyrics = LA.getlyrics(artist, title)
-        wordlist = LA.lyricTokens(lyrics)
-        lyricScore = LA.lyricAnalyse(wordlist, moods)
+        lyrics = LA.get_lyrics(artist, title)
+        word_list = LA.lyric_tokens(lyrics)
+        lyric_score = LA.lyric_analyse(word_list, moods)
     except:
-        lyricScore = [-1, -1, -1, -1]
-    return(lyricScore)
+        lyric_score = [-1, -1, -1, -1]
+    return(lyric_score)
 
 artist = 'David Guetta featuring Kelly Rowland'
 title = 'When Love Takes Over'
 moods = ['angry', 'happy', 'relaxed', 'sad']
 
-lyricScore = GetScore(artist, title, moods)
+lyric_score = get_score(artist, title, moods)
