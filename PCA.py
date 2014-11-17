@@ -6,11 +6,33 @@ Created on Mon Oct 27 13:55:46 2014
 """
 
 import numpy as np
+import MySQLdb
 from sklearn.decomposition import PCA
+from config import getfromconfig
 
-from mqsqlinterface import MySQLConnection
-    
-conn = MySQLConnection('83.92.40.216', 'bobafett', 'bobafett', 'radiogaga')
+class MySQLConnection:
+    """Set up a connection to a MySQL sever
+    Args:
+        address: the address to the mysql server.\n
+        usr: the usename.\n
+        psw: the password.\n
+        dbname: the name of the database.
+    """
+    def __init__(self, host, usr, psw, dbname):
+        self.host = host
+        self.usr = usr
+        self.psw = psw
+        self.dbname = dbname
+        self.setup_connection()
+
+    def setup_connection(self):
+        self.db = MySQLdb.connect(self.host, self.usr, self.psw, self.dbname)
+        self.cursor = self.db.cursor()
+
+    def end_connection(self):
+        self.db.close()
+line = getfromconfig()
+conn = MySQLConnection(line[0], line[1], line[2], line[3])
 
 def do_pca(radiokanal,time,connection):
     """Compute PCA and return data projected onto 2 principal directions.
@@ -44,4 +66,4 @@ def do_pca(radiokanal,time,connection):
     np.savetxt(str(radiokanal)+'_X_pca.csv', X_pca, delimiter = ',', fmt='%s')        
     return(Y_pca)
     
-do_pca('p3','%2014%',conn)
+do_pca('p3','%2014-11-14T11%',conn)
