@@ -1,9 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Wed Nov 12 00:04:54 2014
-
-@author: Rasmus
-"""
 import MySQLdb
 
 
@@ -29,46 +24,70 @@ class MySQLConnection:
     def end_connection(self):
         self.db.close()
 
-# The following provide a example for setting up a connection
-conn = MySQLConnection('83.92.40.216', 'myusername', 'mypassword', 'db')
-
 
 def radiogaga_db_get(MySQLConnection, table, element):
     """Get element from Radio gaga server interface
     Args:
         MySQLConnection: element of type MySQLConnection
         table: name of the table in database
-        element: dictionary of information to insert holding e.g.
-                 element = {'track':'Enter Sandman',\n
-                            'artist':'Metallica',\n
-                            'time':'2014-9-11T20:02:55',\n
-                            'lastplay':'2014-9-11T20:02:55',\n
-                            'bpm':120,\n
-                            'angry':110,\n
-                            'relaxed':23,\n
-                            'sad':34,\n
-                            'happy':2}
+        element: dictionary of information to search for
     """
     # DB connection
     conn = MySQLConnection
 
-    # Write the mysql command to send to the server
-    sql_command = """SELECT * FROM %s WHERE""" % (table)
-    n_element = len(element)
-    count = 0
+    # Write the mysql command to send to the server.
+    s = "SELECT * FROM {0} WHERE ".format(table)
+    n = len(element)
+    count = 1
     for option in element:
-        sql_command = sql_command + """ %s LIKE "%s"
-                                    """ % (option, element[option])
+        s = s + "{0} LIKE '{1}'".format(option, element[option])
         count = count + 1
-        if count < n_element:
-            sql_command = sql_command + "AND"
+        if count <= n:
+            s = s + " AND "
 
     # Commit the command
-    conn.cursor.execute(sql_command)
-    answear = conn.cursor.fetchall()
-    return answear
+    conn.cursor.execute(s)
+    answer = conn.cursor.fetchall()
+    return(answer)
 
-# Providing an example for calling the function
-element = {'lastplay': '%2014-11-09T%'}
-answear = radiogaga_db_get(conn, 'p3', element)
-print(answear)
+
+def radiogaga_db_insert(MySQLconnection, table, element):
+    """Insert an element to the radiogaga database
+
+    Args:
+        MySQLconnection: element of type MySQLConnection
+        talbe: name of the table
+        element: dictionary of information to insert
+    """
+    # DB connection
+    conn = MySQLconnection
+
+    # Write the mysql command to send to the server
+    # Note that this follows the new PEP 3101 and PEP 249 (DB-API)
+    s = "INSERT INTO {0} ("
+    s = s.format(table)
+    count = 1
+    n = len(element)
+    for option in element:
+        if count == n:
+            d = "{0}"
+        else:
+            d = "{0},"
+        d = d.format(option)
+        s = s + d
+        count = count + 1
+    s = s + ") VALUES ("
+    count = 1
+    for option in element:
+        if count == n:
+            d = "'{0}'"
+        else:
+            d = "'{0}',"
+        d = d.format(element[option])
+        s = s + d
+        count = count + 1
+    s = s + ")"
+
+    # Commit the command
+    conn.cursor.execute(s)
+    conn.db.commit()
