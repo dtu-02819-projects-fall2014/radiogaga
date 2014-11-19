@@ -1,15 +1,40 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Oct 27 13:31:03 2014
-
-@author: Joachim
-"""
 from __future__ import division
-import json
 import urllib2 as ul
 import csv
+import math
 from numpy import multiply
 from nltk.tokenize import RegexpTokenizer
+import datamining as dm
+
+
+def get_score(artist, title, moods):
+    """Computes a score of how angry, happy, relaxed, sad, etc. a song is.
+    Args:
+        artist (str): Name of a music artist.
+        title (str): Title of a song by a music artist.
+        moods (list of str): List with moods to be used when computing score.
+    Returns:
+        int: Score that indicates how angry, happy, relaxed, sad, etc.
+        the specified song is.
+    """
+    # Search for lyrics
+    lyrics = get_lyrics(artist, title)
+
+    # Tokenize
+    word_list = lyric_tokens(lyrics)
+
+    # Calculate the lyric score
+    lyric_score = lyric_analyse(word_list, moods)
+
+    # Check for nan
+    for t in range(len(lyric_score)):
+        if math.isnan(lyric_score[t]):
+            lyric_score[t] = 0
+
+    # Print result
+    print(lyric_score)
+    return(lyric_score)
 
 
 def get_lyrics(artist, title):
@@ -23,18 +48,17 @@ def get_lyrics(artist, title):
     artist = ul.quote(artist.encode('utf-8'))
     artist = artist.split('feat', 1)[0]  # Removes any featuring artists
     title = ul.quote(title.encode('utf-8'))
-    address = {"http": "https://community.musixmatch.com/ws/1.1/track.lyrics" +
-               ".get?app_id=community-app-v1.0&usertoken=db563b8c83b3347348b" +
-               "13b2860e49f32a7461eb269ca19a1&format=json&part=lyrics_crowd%" +
-               "2Cuser&commontrack_vanity_id="+artist+'%2F'+title}
-    headers = {'User-agent': 'Mozilla/5.0'}
-    prox = ul.ProxyHandler(address)
-    opener = ul.build_opener(prox, ul.HTTPHandler(debuglevel=0))
-    ul.install_opener(opener)
-    req = ul.Request(address["http"], None, headers)
-    data = ul.urlopen(req).read()
-    json_data = json.loads(data)
-    lyrics = json_data['message']['body']['lyrics']['lyrics_body']
+
+    token = "db563b8c83b3347348b13b2860e49f32a7461eb269ca19a1"
+    json_url = "https://community.musixmatch.com/ws/1.1/track.lyrics.get"
+    json_url = json_url + "?app_id=community-app-v1.0&usertoken={0}&format="
+    json_url = json_url + "json&part=lyrics_crowd%2Cuser&commontrack_vanity_id"
+    json_url = json_url + "={1}%2F+{2}"
+    json_url = json_url.format(token, artist, title)
+
+    keywords = ['message', 'body', 'lyrics', 'lyrics_body']
+    jr = dm.JsonResponse(json_url, keywords)
+    lyrics = jr.answer
     return(lyrics)
 
 
@@ -50,7 +74,6 @@ def lyric_tokens(lyric):
     lyric = lyric.replace('\n', ' ')
     lyric = lyric.replace('f*ck', 'fuck')
     lyric = lyric.replace('\'', '')
-    lyric = lyric.replace('\x92', '')
     tokenizer = RegexpTokenizer(r'\w+')
     tokens = tokenizer.tokenize(lyric)
     # Remove words of length 1 and make letters lower case

@@ -1,36 +1,32 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Sep 29 16:12:48 2014
-
-@author: Søren bærbar
-"""
 import json
 import urllib2 as ul
-
+import datamining as dm
 
 def getbpm(artist, title):
     artist = artist.split(' feat', 1)[0]
     artist = ul.quote(artist.encode('utf-8'))
     title = ul.quote(title.encode('utf-8'))
-    url_str_id = """http://developer.echonest.com/api/v4/
-    				song/search?api_key=KEY&artist="""+artist+"&title="+title
-    headers = {'User-agent': 'Mozilla/5.0'}
+    api_key = '6CQET4WZOPHVC3RCZ'
 
-    ul_req_id = ul.Request(url_str_id, None, headers)
-    json_str_id = ul.urlopen(ul_req_id).read()
-    json_data_id = json.loads(json_str_id)
+    url_str_id = "http://developer.echonest.com/api/v4/song/search?api_key={0}&artist={1}&title={2}"
+    url_str_id = url_str_id.format(api_key, artist, title)
+
+    keywords = ['response','songs',0,'id']
 
     try:
-        song_id = json_data_id['response']['songs'][0]['id']
+        jr = dm.JsonResponse(url_str_id, keywords)
+        song_id = jr.answer
+
+        url_str_bpm = "http://developer.echonest.com/api/v4/song/profile?api_key={0}&id={1}&bucket=audio_summary"
+        url_str_bpm = url_str_bpm.format(api_key, song_id)    
+
+        keywords = ['response', 'songs', 0, 'audio_summary', 'tempo']
+        jr = dm.JsonResponse(url_str_bpm, keywords)
+        song_tempo = jr.answer
+
+        return(song_tempo)
+
     except:
-        print('ERROR: NOT IN ECHONEST?!?' + artist + title)
+        print('Error: track was not found in Echonest: ' + artist + title)
         return(0)
-
-	url_str_bpm = """http://developer.echonest.com/api/v4/
-					 song/profile?api_key=KEY&id=""" + song_id +'&bucket=audio_summary'
-    ul_req_bpm = ul.Request(url_str_bpm)
-    json_str_bpm = ul.urlopen(ul_req_bpm).read()
-    json_data_bpm = json.loads(json_str_bpm)
-
-    song_tempo = json_data_bpm['response']['songs'][0]['audio_summary']['tempo']
-    return(song_tempo)
