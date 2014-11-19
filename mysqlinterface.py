@@ -40,7 +40,7 @@ def radiogaga_db_get(MySQLConnection, table, element):
     n = len(element)
     count = 1
     for option in element:
-        s = s + "{0} LIKE '{1}'".format(option, element[option])
+        s = s + """{0} LIKE "{1}" """.format(option, element[option])
         count = count + 1
         if count <= n:
             s = s + " AND "
@@ -80,9 +80,9 @@ def radiogaga_db_insert(MySQLconnection, table, element):
     count = 1
     for option in element:
         if count == n:
-            d = "'{0}'"
+            d = """ "{0}" """
         else:
-            d = "'{0}',"
+            d = """ "{0}","""
         d = d.format(element[option])
         s = s + d
         count = count + 1
@@ -91,3 +91,46 @@ def radiogaga_db_insert(MySQLconnection, table, element):
     # Commit the command
     conn.cursor.execute(s)
     conn.db.commit()
+
+
+def radiogaga_db_update(MySQLconnection, table, set_element, where_element):
+    """Update existing track/artist info
+    
+    Args:
+        MySQLconnection: element of type MySQLConnection
+        table: namem of table
+        set_element: element with info to update
+        where_element: element with info about which element to update
+    """
+    conn = MySQLconnection
+    
+    # Write the mysql command to send to the server
+    # Note this follows the new PEP 3101 and PEP 249 (DB-API)
+    s = "UPDATE {0} SET "
+    s = s.format(table)
+    set_n = len(set_element)
+    set_count = 1
+    for option in set_element:
+        if set_count == set_n:
+            d = "{0}='{1}'"
+        else:
+            d = "{0}='{1}', "
+        d = d.format(option, set_element[option])
+        s = s + d
+        set_count = set_count + 1
+    s = s + " WHERE "
+    where_n = len(where_element)
+    where_count = 1
+    for option in where_element:
+        if where_count == where_n:
+            d = """{0}="{1}" """
+        else:
+            d = """{0}="{1}" AND """
+        d = d.format(option, where_element[option])
+        s = s + d
+        where_count = where_count + 1
+    
+    # Commit the command
+    conn.cursor.execute(s)
+    conn.db.commit()
+        
