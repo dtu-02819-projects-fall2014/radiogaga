@@ -54,8 +54,8 @@ def do_pca(radiokanal, time, connection):
 
     """
     sqlstring = """SELECT track, artist, bpm, angry, happy, relaxed, sad
-                 FROM %s WHERE time LIKE "%s" AND bpm NOT IN ( -1, 0 ) AND
-                 angry NOT IN (-1,0)""" % (radiokanal, time)
+                 FROM {0} WHERE history LIKE {1} AND bpm NOT IN (0) AND
+                 angry NOT IN (0) """.format(radiokanal, time)            
     connection.cursor.execute(sqlstring)
     data = connection.cursor.fetchall()
     Y = np.array(data)
@@ -68,4 +68,4 @@ def do_pca(radiokanal, time, connection):
     np.savetxt(str(radiokanal)+'_X_pca.csv', X_pca, delimiter=',', fmt='%s')
     return(Y_pca)
 
-do_pca('p3', '%2014-11-14T11%', conn)
+do_pca('A', "'%2014-11-23%'", conn)
