@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 import urllib2 as ul
 import datamining as dm
 
@@ -28,5 +27,5 @@ def getbpm(artist, title):
         return(song_tempo)
 
     except:
-        print('Error: track was not found in Echonest: ' + artist ' ' + title)
+        print('Error: track was not found in Echonest: ' + artist + ' ' + title)
         return(0)
