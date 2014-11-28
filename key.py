@@ -40,8 +40,8 @@ def check_key(key):
     """
     Check that a key is unique. Returns 1 if so, 0 otherwise
     """
-	# Get config
-	line = getfromconfig()
+    # Get config
+    line = getfromconfig()
 	
     # Open a new connection
     conn = my.MySQLConnection(line[0], line[1], line[2], line[3])
