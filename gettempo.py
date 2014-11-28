@@ -1,12 +1,16 @@
 # -*- coding: utf-8 -*-
 import urllib2 as ul
 import datamining as dm
+from config import getfromconfig
 
 def getbpm(artist, title):
     artist = artist.split(' feat', 1)[0]
     artist = ul.quote(artist.encode('utf-8'))
     title = ul.quote(title.encode('utf-8'))
-    api_key = '6CQET4WZOPHVC3RCZ'
+	
+	# Get API key
+	line = getfromconfig()
+    api_key = line[4]
 
     url_str_id = "http://developer.echonest.com/api/v4/song/search?api_key={0}&artist={1}&title={2}"
     url_str_id = url_str_id.format(api_key, artist, title)

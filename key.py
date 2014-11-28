@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import random as ran
 import mysqlinterface as my
+from config import getfromconfig
 
 
 def unique_key(size):
@@ -39,9 +40,12 @@ def check_key(key):
     """
     Check that a key is unique. Returns 1 if so, 0 otherwise
     """
+	# Get config
+	line = getfromconfig()
+	
     # Open a new connection
-    conn = my.MySQLConnection('ip', 'usr', 'psd', 'db')
-    set_of_tables = ['P3', 'P6B', 'P7M', 'RAM']
+    conn = my.MySQLConnection(line[0], line[1], line[2], line[3])
+    set_of_tables = ['A']
 
     # Go through each table
     for table in set_of_tables:
