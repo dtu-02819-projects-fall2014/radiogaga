@@ -1,39 +1,8 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Oct 27 13:55:46 2014
-
-@author: Søren bærbar
-"""
-
 import numpy as np
-import MySQLdb
+import mysqlinterface as my
 from sklearn.decomposition import PCA
 from config import getfromconfig
-
-
-class MySQLConnection:
-    """Set up a connection to a MySQL sever
-    Args:
-        address: the address to the mysql server.\n
-        usr: the usename.\n
-        psw: the password.\n
-        dbname: the name of the database.
-    """
-    def __init__(self, host, usr, psw, dbname):
-        self.host = host
-        self.usr = usr
-        self.psw = psw
-        self.dbname = dbname
-        self.setup_connection()
-
-    def setup_connection(self):
-        self.db = MySQLdb.connect(self.host, self.usr, self.psw, self.dbname)
-        self.cursor = self.db.cursor()
-
-    def end_connection(self):
-        self.db.close()
-line = getfromconfig()
-conn = MySQLConnection(line[0], line[1], line[2], line[3])
 
 
 def do_pca(radiokanal, time, connection):
@@ -55,7 +24,7 @@ def do_pca(radiokanal, time, connection):
     """
     sqlstring = """SELECT track, artist, bpm, angry, happy, relaxed, sad
                  FROM {0} WHERE history LIKE {1} AND bpm NOT IN (0) AND
-                 angry NOT IN (0) """.format(radiokanal, time)            
+                 angry NOT IN (0) """.format(radiokanal, time)
     connection.cursor.execute(sqlstring)
     data = connection.cursor.fetchall()
     Y = np.array(data)
@@ -68,4 +37,17 @@ def do_pca(radiokanal, time, connection):
     np.savetxt(str(radiokanal)+'_X_pca.csv', X_pca, delimiter=',', fmt='%s')
     return(Y_pca)
 
-do_pca('A', "'%2014-11-23%'", conn)
+
+def EJ(a, b):
+    """Calculate the Extended Jaccard similarity meassure
+
+    Arguments:
+        a,b: two list of same length
+
+    Output:
+        the value of EJ
+    """
+    numerator = np.dot(a, b)
+    denominator = np.sum(np.power(a, 2)) + np.sum(np.power(b, 2)) - numerator
+    value = np.divide(numerator, denominator)
+    return(value)
