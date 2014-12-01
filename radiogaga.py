@@ -1,4 +1,9 @@
-# -*- coding: utf-8 -*-
+r"""
+Lyricanalysis - Radiogaga.
+
+This file belongs to Joachim Blom Hansen, Rasmus Jessen Aaskov and Soren
+Trads Steen.
+"""
 import sys
 import datamining as dm
 import mysqlinterface as my

@@ -1,16 +1,14 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Nov 17 14:35:51 2014
+r"""
+config - Radiogaga.
 
-@author: Søren bærbar
+This file belongs to Joachim Blom Hansen, Rasmus Jessen Aaskov and Soren
+Trads Steen.
 """
 import csv
 
 
 def getfromconfig():
-    """
-    Return fields from a single line csv file.
-    """
+    """Return fields from a single line csv file."""
     with open('configuration.csv') as f:
         r = csv.reader(f)
         line = r.next()

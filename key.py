@@ -1,11 +1,16 @@
-# -*- coding: utf-8 -*-
+r"""
+Lyricanalysis - Radiogaga.
+
+This file belongs to Joachim Blom Hansen, Rasmus Jessen Aaskov and Soren
+Trads Steen.
+"""
 import random as ran
 import mysqlinterface as my
 from config import getfromconfig
 
 
 def unique_key(size):
-    """Return a unique key
+    """Return a unique key.
 
     Args:
         size: the size of the string returned
@@ -37,9 +42,7 @@ def unique_key(size):
 
 
 def check_key(key):
-    """
-    Check that a key is unique. Returns 1 if so, 0 otherwise
-    """
+    """Check that a key is unique. Returns 1 if so, 0 otherwise."""
     # Get config
     line = getfromconfig()
 	
