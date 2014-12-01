@@ -16,7 +16,7 @@ from config import getfromconfig
 
 def get_score(artist, title, moods):
     """Compute a score of how angry, happy, relaxed, sad, etc. a song is.
-    
+
     Args:
         artist (str): Name of a music artist.
         title (str): Title of a song by a music artist.
@@ -46,7 +46,7 @@ def get_score(artist, title, moods):
 
 def get_lyrics(artist, track):
     """Find the lyrics to a song.
-    
+
     Args:
         artist (str): Name of a music artist.
         title (str): Title of a song by a music artist.
@@ -54,7 +54,6 @@ def get_lyrics(artist, track):
         str: Lyrics to the specified song.
     """
     artist = ul.quote(artist.encode('utf-8'))
-    #artist = artist.split('feat', 1)[0]  # Removes any featuring artists
     track = ul.quote(track.encode('utf-8'))
 
     # Get the API key
@@ -69,25 +68,27 @@ def get_lyrics(artist, track):
     artist_url = """&q_artist={0}""".format(artist)
     option = '&f_has_lyrics=1'
     call = base + search_url + api + track_url + artist_url + option
-    an = dm.JsonResponse(call, ['message','body','track_list',0,'track','track_id'])
+    an = dm.JsonResponse(call, ['message', 'body', 'track_list',
+                                0, 'track', 'track_id'])
     track_id = an.answer
-    
+
     # Then get the lyric with the found track id
     lyric_url = 'track.lyrics.get?'
     id_url = """&track_id={0}""".format(track_id)
     call = base + lyric_url + api + id_url
-    an = dm.JsonResponse(call, ['message','body','lyrics','lyrics_body'])
+    an = dm.JsonResponse(call, ['message', 'body', 'lyrics', 'lyrics_body'])
 
     lyrics = an.answer
-    
-    lyrics = lyrics.replace('******* This Lyrics is NOT for Commercial use *******','')
+
+    lyrics = lyrics.replace('******* This Lyrics is' +
+                            'NOT for Commercial use *******', '')
 
     return(lyrics)
 
 
 def lyric_tokens(lyric):
     """Tokenization of lyrics.
-    
+
     Args:
         lyric (str): String of lyrics to a song.
     Returns:
@@ -111,7 +112,7 @@ def lyric_tokens(lyric):
 
 def open_libraries(mood_lib):
     """Open a csv file and return rows as list.
-       
+
     Args:
         moods (list of str): List with names of text files.
     Returns:
@@ -127,7 +128,7 @@ def open_libraries(mood_lib):
 
 def lyric_analyse(lyric_list, mood_lib):
     """Count the number of times a word is in the mood library.
-        
+
     Args:
         lyric_list (list of str): List of words from lyrics
         moods (list of str): List with names of word libraries
@@ -148,4 +149,4 @@ def lyric_analyse(lyric_list, mood_lib):
         word_count = word_count/len(lyric_list)
 
     word_count = word_count.tolist()
-    return(word_count) 
+    return(word_count)
