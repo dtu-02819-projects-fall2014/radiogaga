@@ -1,16 +1,20 @@
-# -*- coding: utf-8 -*-
+r"""
+Machine learning - Radiogaga.
+
+This file belongs to Joachim Blom Hansen, Rasmus Jessen Aaskov and Soren
+Trads Steen.
+"""
+
 import numpy as np
-import mysqlinterface as my
 from sklearn.decomposition import PCA
-from config import getfromconfig
 
 
 def do_pca(radiokanal, time, connection):
     """Compute PCA and return data projected onto 2 principal directions.
 
     Arguments:
-        radiokanal: the radio channel to be examined.\n
-        time: ex '%2014-11-11%'. \n
+        radiokanal: the radio channel to be examined.
+        time: ex '%2014-11-11%'.
         connection: connection to database, see class MySQLConnection.
 
     Output:
@@ -39,7 +43,7 @@ def do_pca(radiokanal, time, connection):
 
 
 def EJ(a, b):
-    """Calculate the Extended Jaccard similarity meassure
+    """Calculate the Extended Jaccard similarity meassure.
 
     Arguments:
         a,b: two list of same length
