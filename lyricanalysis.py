@@ -110,7 +110,7 @@ def lyric_tokens(lyric):
 
 
 def open_libraries(mood_lib):
-    """Open a csv files with name ending in 'WordLib.csv'.
+    """Open a csv file and return rows as list.
        
     Args:
         moods (list of str): List with names of text files.
@@ -148,4 +148,4 @@ def lyric_analyse(lyric_list, mood_lib):
         word_count = word_count/len(lyric_list)
 
     word_count = word_count.tolist()
-    return(word_count)
+    return(word_count) 
