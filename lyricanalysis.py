@@ -1,4 +1,9 @@
-# -*- coding: utf-8 -*-
+r"""
+Lyricanalysis - Radiogaga.
+
+This file belongs to Joachim Blom Hansen, Rasmus Jessen Aaskov and Soren
+Trads Steen.
+"""
 from __future__ import division
 import urllib2 as ul
 import csv
@@ -9,7 +14,8 @@ import datamining as dm
 
 
 def get_score(artist, title, moods):
-    """Computes a score of how angry, happy, relaxed, sad, etc. a song is.
+    """Compute a score of how angry, happy, relaxed, sad, etc. a song is.
+    
     Args:
         artist (str): Name of a music artist.
         title (str): Title of a song by a music artist.
@@ -37,33 +43,47 @@ def get_score(artist, title, moods):
     return(lyric_score)
 
 
-def get_lyrics(artist, title):
+def get_lyrics(artist, track):
     """Find the lyrics to a song.
+    
     Args:
         artist (str): Name of a music artist.
         title (str): Title of a song by a music artist.
     Returns:
-        str: Lyrics to the specified song
+        str: Lyrics to the specified song.
     """
     artist = ul.quote(artist.encode('utf-8'))
-    artist = artist.split('feat', 1)[0]  # Removes any featuring artists
-    title = ul.quote(title.encode('utf-8'))
+    #artist = artist.split('feat', 1)[0]  # Removes any featuring artists
+    track = ul.quote(track.encode('utf-8'))
 
-    token = "db563b8c83b3347348b13b2860e49f32a7461eb269ca19a1"
-    json_url = "https://community.musixmatch.com/ws/1.1/track.lyrics.get"
-    json_url = json_url + "?app_id=community-app-v1.0&usertoken={0}&format="
-    json_url = json_url + "json&part=lyrics_crowd%2Cuser&commontrack_vanity_id"
-    json_url = json_url + "={1}%2F+{2}"
-    json_url = json_url.format(token, artist, title)
 
-    keywords = ['message', 'body', 'lyrics', 'lyrics_body']
-    jr = dm.JsonResponse(json_url, keywords)
-    lyrics = jr.answer
+    # Start by getting the track id
+    api = 'apikey=e09c71c88ce173e2f2a05f9fec97fa4b'
+    base = 'http://api.musixmatch.com/ws/1.1/'
+    search_url = 'track.search?'
+    track_url = """&q_track={0}""".format(track)
+    artist_url = """&q_artist={0}""".format(artist)
+    option = '&f_has_lyrics=1'
+    call = base + search_url + api + track_url + artist_url + option
+    an = dm.JsonResponse(call, ['message','body','track_list',0,'track','track_id'])
+    track_id = an.answer
+    
+    # Then get the lyric with the found track id
+    lyric_url = 'track.lyrics.get?'
+    id_url = """&track_id={0}""".format(track_id)
+    call = base + lyric_url + api + id_url
+    an = dm.JsonResponse(call, ['message','body','lyrics','lyrics_body'])
+
+    lyrics = an.answer
+    
+    lyrics = lyrics.replace('******* This Lyrics is NOT for Commercial use *******','')
+
     return(lyrics)
 
 
 def lyric_tokens(lyric):
     """Tokenization of lyrics.
+    
     Args:
         lyric (str): String of lyrics to a song.
     Returns:
@@ -72,6 +92,7 @@ def lyric_tokens(lyric):
     # Formatting of words to remove unnecessary new line chars,
     # censorship and apostrophes
     lyric = lyric.replace('\n', ' ')
+    lyric = lyric.replace('\r', ' ')
     lyric = lyric.replace('f*ck', 'fuck')
     lyric = lyric.replace('\'', '')
     tokenizer = RegexpTokenizer(r'\w+')
@@ -85,8 +106,8 @@ def lyric_tokens(lyric):
 
 
 def open_libraries(mood_lib):
-    """Opens csv files with name ending in 'WordLib.csv',
-       for example 'angryWordLib.csv'.
+    """Open a csv files with name ending in 'WordLib.csv'.
+       
     Args:
         moods (list of str): List with names of text files.
     Returns:
@@ -101,8 +122,8 @@ def open_libraries(mood_lib):
 
 
 def lyric_analyse(lyric_list, mood_lib):
-    """Counts the number of times a word in the lyrics is found in each
-        word library
+    """Count the number of times a word is in the mood library.
+        
     Args:
         lyric_list (list of str): List of words from lyrics
         moods (list of str): List with names of word libraries
@@ -118,6 +139,9 @@ def lyric_analyse(lyric_list, mood_lib):
             word_count[i] = word_count[i]+temp_count
     # Scaling and division by length of song
     word_count = multiply(1000, word_count)
-    word_count = word_count/len(lyric_list)
+
+    if len(lyric_list) > 0:
+        word_count = word_count/len(lyric_list)
+
     word_count = word_count.tolist()
     return(word_count)

@@ -1,16 +1,25 @@
-# -*- coding: utf-8 -*-
+r"""
+MySQLinterface - Radiogaga.
+
+This file belongs to Joachim Blom Hansen, Rasmus Jessen Aaskov and Soren
+Trads Steen.
+"""
 import MySQLdb
 
 
 class MySQLConnection:
-    """Set up a connection to a MySQL sever
+    
+    r"""Set up a connection to a MySQL sever.
+    
     Args:
-        address: the address to the mysql server.\n
-        usr: the usename.\n
-        psw: the password.\n
+        address: the address to the mysql server.
+        usr: the usename.
+        psw: the password.
         dbname: the name of the database.
     """
+    
     def __init__(self, host, usr, psw, dbname):
+        """Initialize the MySQLConnection class."""
         self.host = host
         self.usr = usr
         self.psw = psw
@@ -18,15 +27,18 @@ class MySQLConnection:
         self.setup_connection()
 
     def setup_connection(self):
+        """Setting up a connection to a MySQL db."""
         self.db = MySQLdb.connect(self.host, self.usr, self.psw, self.dbname)
         self.cursor = self.db.cursor()
 
     def end_connection(self):
+        """Closing the MySQL connection."""
         self.db.close()
 
 
 def radiogaga_db_get(MySQLConnection, table, element):
-    """Get element from Radio gaga server interface
+    r"""Get element from Radio gaga server interface.
+    
     Args:
         MySQLConnection: element of type MySQLConnection
         table: name of the table in database
@@ -52,7 +64,7 @@ def radiogaga_db_get(MySQLConnection, table, element):
 
 
 def radiogaga_db_insert(MySQLconnection, table, element):
-    """Insert an element to the radiogaga database
+    r"""Insert an element to the radiogaga database.
 
     Args:
         MySQLconnection: element of type MySQLConnection
@@ -94,7 +106,7 @@ def radiogaga_db_insert(MySQLconnection, table, element):
 
 
 def radiogaga_db_update(MySQLconnection, table, set_element, where_element):
-    """Update existing track/artist info
+    r"""Update existing track/artist info.
     
     Args:
         MySQLconnection: element of type MySQLConnection
