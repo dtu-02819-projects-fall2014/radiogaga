@@ -11,6 +11,7 @@ import math
 from numpy import multiply
 from nltk.tokenize import RegexpTokenizer
 import datamining as dm
+from config import getfromconfig
 
 
 def get_score(artist, title, moods):
@@ -56,9 +57,12 @@ def get_lyrics(artist, track):
     #artist = artist.split('feat', 1)[0]  # Removes any featuring artists
     track = ul.quote(track.encode('utf-8'))
 
+    # Get the API key
+    line = getfromconfig()
+    api_key = line[5]
 
     # Start by getting the track id
-    api = 'apikey=e09c71c88ce173e2f2a05f9fec97fa4b'
+    api = 'apikey=' + api_key
     base = 'http://api.musixmatch.com/ws/1.1/'
     search_url = 'track.search?'
     track_url = """&q_track={0}""".format(track)
