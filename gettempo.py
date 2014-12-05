@@ -26,8 +26,8 @@ def getbpm(artist, title):
     line = getfromconfig()
     api_key = line[4]
 
-    url_str_id = """http://developer.echonest.com/api/v4/
-                    song/search?api_key={0}&artist={1}&title={2}"""
+    url_str_id = """http://developer.echonest.com/api/v4/song/search?"""
+    url_str_id = url_str_id + """api_key={0}&artist={1}&title={2}"""
     url_str_id = url_str_id.format(api_key, artist, title)
 
     keywords = ['response', 'songs', 0, 'id']
@@ -36,12 +36,12 @@ def getbpm(artist, title):
         jr = dm.JsonResponse(url_str_id, keywords)
         song_id = jr.answer
 
-        url_str_bpm = """http://developer.echonest.com/api/v4/song/profile?
-                         api_key={0}&id={1}&bucket=audio_summary"""
-        url_str_bpm = url_str_bpm.format(api_key, song_id)
+        url_bpm = """http://developer.echonest.com/api/v4/song/profile?"""
+        url_bpm = url_bpm +"""api_key={0}&id={1}&bucket=audio_summary"""
+        url_bpm = url_bpm.format(api_key, song_id)
 
         keywords = ['response', 'songs', 0, 'audio_summary', 'tempo']
-        jr = dm.JsonResponse(url_str_bpm, keywords)
+        jr = dm.JsonResponse(url_bpm, keywords)
         song_tempo = jr.answer
 
         return(song_tempo)
