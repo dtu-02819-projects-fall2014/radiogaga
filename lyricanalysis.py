@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 r"""
 Lyricanalysis - Radiogaga.
 
@@ -14,25 +15,25 @@ import datamining as dm
 from config import getfromconfig
 
 
-def get_score(artist, title, moods):
+def get_score(artist, track, mood_lib):
     """Compute a score of how angry, happy, relaxed, sad, etc. a song is.
 
     Args:
         artist (str): Name of a music artist.
-        title (str): Title of a song by a music artist.
-        moods (list of str): List with moods to be used when computing score.
+        track (str): Title of a song by a music artist.
+        mood_lib (str): Name of mood library text file.
     Returns:
         int: Score that indicates how angry, happy, relaxed, sad, etc.
         the specified song is.
     """
     # Search for lyrics
-    lyrics = get_lyrics(artist, title)
+    lyrics = get_lyrics(artist, track)
 
     # Tokenize
     word_list = lyric_tokens(lyrics)
 
     # Calculate the lyric score
-    lyric_score = lyric_analyse(word_list, moods)
+    lyric_score = lyric_analyse(word_list, mood_lib)
 
     # Check for nan
     for t in range(len(lyric_score)):
@@ -49,7 +50,7 @@ def get_lyrics(artist, track):
 
     Args:
         artist (str): Name of a music artist.
-        title (str): Title of a song by a music artist.
+        track (str): Title of a song by a music artist.
     Returns:
         str: Lyrics to the specified song.
     """
@@ -114,7 +115,7 @@ def open_libraries(mood_lib):
     """Open a csv file and return rows as list.
 
     Args:
-        moods (list of str): List with names of text files.
+        mood_lib (str): Name of library text files.
     Returns:
         List of list of str: List of lists with words from specified libraries.
     """
@@ -131,9 +132,10 @@ def lyric_analyse(lyric_list, mood_lib):
 
     Args:
         lyric_list (list of str): List of words from lyrics
-        moods (list of str): List with names of word libraries
+        mood_lib (str): Name of mood library text file
     Returns:
-        int: Number of times a word from lyrics is found in each library.
+        int: Number of times a word from lyrics is found
+        in each row of library.
     """
     mood_list = open_libraries(mood_lib)
     word_count = [0]*len(mood_list)
