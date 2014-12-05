@@ -53,5 +53,8 @@ def EJ(a, b):
     """
     numerator = np.dot(a, b)
     denominator = np.sum(np.power(a, 2)) + np.sum(np.power(b, 2)) - numerator
-    value = np.divide(numerator, denominator)
+    if np.sum(numerator+denominator) == 0:
+        value = 1
+    else:
+        value = np.divide(numerator, denominator)
     return(value)
